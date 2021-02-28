@@ -12,18 +12,13 @@ import requests
 from PIL import Image
 import matplotlib.pyplot as plt
 
+from common import utils
+
 
 class LoginFuncRequests(object):
     def __init__(self):
         self.session = requests.session()
         self.img_path = 'cookieserverfunction/image/code.png'
-
-        self.headers = {
-            'Host': 'ssl.ptlogin2.qq.com',
-            'Referer': 'https://xui.ptlogin2.qq.com/',
-            'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36',
-        }
 
     def code_show(self):
         url = 'https://ssl.ptlogin2.qq.com/ptqrshow?'
@@ -38,7 +33,11 @@ class LoginFuncRequests(object):
             'daid': '73',
             'pt_3rd_aid': '0',
         }
-        response = self.session.get(url, params=data, headers=self.headers)
+        utils.headers['Host'] = 'ssl.ptlogin2.qq.com'
+        utils.headers['Referer'] = 'https://xui.ptlogin2.qq.com/'
+        print(utils.headers)
+        response = self.session.get(url, params=data, headers=utils.headers)
+        utils.headers.pop('Host')
         print(response.status_code)
         with open('cookieserverfunction/image/code.png', 'wb') as f:
             f.write(response.content)
@@ -47,7 +46,7 @@ class LoginFuncRequests(object):
         return response.cookies
 
     def get_ptqrtoken(self, cookies):
-        with open('lib/bkn.js', 'r') as f:
+        with open('common/bkn.js', 'r') as f:
             js = f.read()
             f.close()
         com = execjs.compile(js)
@@ -64,12 +63,9 @@ class LoginFuncRequests(object):
             'pt_no_auth': '1',
             's_url': 'https://qun.qq.com/',
         }
-        headers = {
-            'referer': 'https://qun.qq.com/',
-            'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36',
-        }
-        response = self.session.get(url, params=data, headers=headers)
+        print(utils.headers)
+        utils.headers['referer'] = 'https://qun.qq.com/'
+        response = self.session.get(url, params=data, headers=utils.headers)
         print(response.cookies)
         login_sig = re.search(r'pt_login_sig=(.*?) ', str(response.cookies)).group(1)
         print('login_sig:', login_sig)
@@ -95,14 +91,9 @@ class LoginFuncRequests(object):
             'aid': '715030901',
             'daid': '73',
         }
-        headers = {
-            'referer': 'https://xui.ptlogin2.qq.com/',
-            'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36',
-        }
-        response = self.session.get(url, params=data, headers=headers, cookies=ck)
+        utils.headers['referer'] = 'https://xui.ptlogin2.qq.com/'
+        response = self.session.get(url, params=data, headers=utils.headers, cookies=ck)
         print(response.text)
-        # print(response.cookies)
         return response.text
 
     def showc(self, ptqrtoken, login_sig, ck):
@@ -139,12 +130,8 @@ class LoginFuncRequests(object):
         return ebg, bg
 
     def get_cookie(self, url):
-        headers = {
-            'referer': 'https://xui.ptlogin2.qq.com/',
-            'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36',
-        }
-        response = self.session.get(url, headers=headers, allow_redirects=False)
+        utils.headers['referer'] = 'https://xui.ptlogin2.qq.com/'
+        response = self.session.get(url, headers=utils.headers, allow_redirects=False)
         print(response.cookies)
         return response.cookies
 
